@@ -1,0 +1,73 @@
+version: 0.2
+env:
+  parameter-store:
+    container_registry: "/iqmock/aws/docker_registry"
+    image_tag: "/iverseadmin/fe/dev/image_tag"
+    aws_region: "/iqmock/aws/region"
+    access_key: "/iqmock/aws/access-key"
+    secret_key: "/iqmock/aws/secret-key"
+    namespace: "/iverse/dev/namespace"
+    codecommit_username: "/iqmock/aws/codecommit/username"
+    codecommit_credentials: "/iqmock/aws/codecommit/credentials"
+phases:
+  install:
+    run-as: root
+    on-failure: ABORT
+    commands:
+      - echo Updating latest updates in linux...
+      - yum update -y
+    finally:
+      - docker --version      
+      - aws configure set aws_access_key_id $access_key 
+      - aws configure set aws_secret_access_key $secret_key 
+      - aws configure set region $aws_region
+      - aws configure get region
+      - echo AWS Access Key,Secret Key and Region is configured
+  pre_build:
+    run-as: root
+    on-failure: ABORT
+    commands:
+      - echo Entered the pre_build phase...
+      - aws ecr get-login-password --region $aws_region | docker login --username AWS --password-stdin $container_registry
+      - echo ECR Docker Login has successful...
+  build:
+    run-as: root
+    on-failure: ABORT
+    commands:
+      - echo Entered the build phase...
+      - echo Build started on `date`
+      - echo $CODEBUILD_BUILD_NUMBER
+      - echo $buildnumber
+      - echo $CODEBUILD_BUILD_SUCCEEDING
+      - docker build -t $container_registry/$image_tag:dev-v1.$CODEBUILD_BUILD_NUMBER .
+      - docker images
+      - docker push $container_registry/$image_tag:dev-v1.$CODEBUILD_BUILD_NUMBER
+      - echo $container_registry/$image_tag:dev-v1.$CODEBUILD_BUILD_NUMBER
+    finally:
+      - echo Build successfully completed
+  post_build:
+    run-as: root
+    on-failure: ABORT
+    commands:
+      - echo "Updating GIT Repository"
+      - touch ~/.git-credentials
+      - echo $codecommit_credentials
+      - echo $codecommit_credentials > ~/.git-credentials
+      - git config --global user.email "info@iquanta.in"
+      - echo "$codecommit_username"
+      - git config --global user.name "$codecommit_username"
+      - git config --global credential.helper 'store --file ~/.git-credentials'
+      - echo git crendentials saved successfully...
+      - echo $(($CODEBUILD_BUILD_NUMBER-1))
+      - pwd
+      - git clone -b main https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/iverse-gitops /root/iverse-gitops
+      - cd
+      - pwd
+      - cd /root/iverse-gitops/dev/iverseadmin
+      - sed -i "s|$container_registry/$image_tag:dev-v1.$(($CODEBUILD_BUILD_NUMBER-1))|$container_registry/$image_tag:dev-v1.$CODEBUILD_BUILD_NUMBER|g" deployment.yaml
+    finally:
+      - echo Pushing code to Code Commit Repository
+      - git add .
+      - git commit -am "updating iversedmin deployment yaml file"
+      - git push origin main
+      - echo Finished pushing to GIT Repository

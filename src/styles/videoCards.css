@@ -1,0 +1,104 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.card {
+  width: 290px;
+  font-family: Roboto;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card__header {
+  background-size: cover;
+  height: 147px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 0 56px 56px;
+  padding: 0px;
+}
+
+.card__header__share {
+  margin-right: auto;
+  align-self: flex-start;
+  font-size: 22px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.card__header__actions {
+  margin-left: auto;
+  align-self: flex-start;
+  font-size: 22px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.card__header__button {
+  animation: bubble 1s infinite alternate;
+  height: 65px;
+  width: 65px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.486);
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.card__header__button span {
+  font-size: 30px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.card__content {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+
+.card__content__title {
+  font-weight: 500;
+  font-size: 18px;
+  margin-top: 30px;
+}
+
+.card__content__description {
+  font-size: 14px;
+  margin-top: 30px;
+  color: #00000087;
+}
+
+.card__content__buy {
+  margin-top: 30px;
+  height: 40px;
+  background: #0053fc;
+  color: #fff;
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-transform: none;
+  font-family: var(--font-inter);
+  transition: background 0.3s;
+}
+
+.card__content__buy:hover {
+  background: #174195e0;
+}
+
+@keyframes bubble {
+  to {
+    box-shadow: 0 0 0 20px #1741955c;
+  }
+}
